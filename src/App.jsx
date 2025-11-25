@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Input, Button, Card, CardBody, Divider, ScrollShadow, Spacer, Select, SelectItem } from "@heroui/react";
-import { motion } from "framer-motion";
+import { Input, Button, Card, CardBody, Divider, ScrollShadow, Spacer, Select, SelectItem, Tabs, Tab } from "@heroui/react";
+import { motion, AnimatePresence } from "framer-motion";
 import html2canvas from 'html2canvas';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
@@ -17,7 +17,8 @@ const App = () => {
 
   const [exportMode, setExportMode] = useState("stitched-horizontal"); 
   const [isGenerating, setIsGenerating] = useState(false);
-  const [scale, setScale] = useState(0.45); // Initial scale smaller
+  const [scale, setScale] = useState(0.45); 
+  const [activeCanvas, setActiveCanvas] = useState("main"); // "main" or "extra"
 
   const tuitionRef = useRef(null);
   const transcriptRef = useRef(null);
@@ -264,7 +265,28 @@ const App = () => {
       </div>
 
       {/* Main Preview Area - Infinite Canvas Style */}
-      <div className="flex-grow overflow-hidden bg-zinc-900 relative cursor-grab active:cursor-grabbing flex items-center justify-center">
+      <div className="flex-grow overflow-hidden bg-zinc-900 relative cursor-grab active:cursor-grabbing flex flex-col items-center justify-center">
+        
+        {/* Canvas Switcher Tabs - Floating at Top */}
+        <div className="absolute top-6 z-40">
+            <Tabs 
+                aria-label="Canvas Selection" 
+                color="primary" 
+                variant="bordered"
+                selectedKey={activeCanvas}
+                onSelectionChange={setActiveCanvas}
+                classNames={{
+                    tabList: "bg-zinc-800/80 backdrop-blur-md border border-white/10 p-1 rounded-lg",
+                    cursor: "bg-primary",
+                    tab: "h-10 px-6 text-sm",
+                    tabContent: "group-data-[selected=true]:text-white text-zinc-400 font-medium"
+                }}
+            >
+                <Tab key="main" title="Standard Documents (3)" />
+                <Tab key="extra" title="Extra Documents (2)" />
+            </Tabs>
+        </div>
+
         {/* Dot Pattern Background */}
         <div className="absolute inset-0 pointer-events-none opacity-20" 
              style={{
@@ -291,70 +313,93 @@ const App = () => {
         </div>
         
         {/* Canvas Container - Scaled to fit view */}
-        <motion.div 
-            ref={containerRef} 
-            className="relative flex flex-row gap-10 p-20 origin-center"
-            style={{
-                width: 'max-content',
-                height: 'max-content',
-                scale: scale // Bind scale to state
-            }}
-        >
-            <motion.div 
-                drag 
-                dragMomentum={false}
-                className="relative group document-card"
-            >
-                <div className="absolute -top-8 left-0 bg-zinc-800 text-white px-3 py-1 rounded-t text-sm doc-label shadow-lg">Tuition Statement</div>
-                <div className="shadow-2xl transition-shadow hover:shadow-blue-500/20">
-                    <TuitionTemplate ref={tuitionRef} data={formData} />
-                </div>
-            </motion.div>
-            
-            <motion.div 
-                drag 
-                dragMomentum={false}
-                className="relative group document-card"
-            >
-                <div className="absolute -top-8 left-0 bg-zinc-800 text-white px-3 py-1 rounded-t text-sm doc-label shadow-lg">Transcript</div>
-                <div className="shadow-2xl transition-shadow hover:shadow-blue-500/20">
-                    <TranscriptTemplate ref={transcriptRef} data={formData} />
-                </div>
-            </motion.div>
+        <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+            <AnimatePresence mode="wait">
+                {activeCanvas === "main" ? (
+                    <motion.div 
+                        key="main-canvas"
+                        ref={containerRef} 
+                        className="absolute flex flex-row gap-10 p-20 origin-center"
+                        initial={{ opacity: 0, scale: scale * 0.9 }}
+                        animate={{ opacity: 1, scale: scale }}
+                        exit={{ opacity: 0, scale: scale * 0.9 }}
+                        transition={{ duration: 0.2 }}
+                        style={{
+                            width: 'max-content',
+                            height: 'max-content',
+                        }}
+                    >
+                        <motion.div 
+                            drag 
+                            dragMomentum={false}
+                            className="relative group document-card"
+                        >
+                            <div className="absolute -top-8 left-0 bg-zinc-800 text-white px-3 py-1 rounded-t text-sm doc-label shadow-lg">Tuition Statement</div>
+                            <div className="shadow-2xl transition-shadow hover:shadow-blue-500/20">
+                                <TuitionTemplate ref={tuitionRef} data={formData} />
+                            </div>
+                        </motion.div>
+                        
+                        <motion.div 
+                            drag 
+                            dragMomentum={false}
+                            className="relative group document-card"
+                        >
+                            <div className="absolute -top-8 left-0 bg-zinc-800 text-white px-3 py-1 rounded-t text-sm doc-label shadow-lg">Transcript</div>
+                            <div className="shadow-2xl transition-shadow hover:shadow-blue-500/20">
+                                <TranscriptTemplate ref={transcriptRef} data={formData} />
+                            </div>
+                        </motion.div>
 
-            <motion.div 
-                drag 
-                dragMomentum={false}
-                className="relative group document-card"
-            >
-                <div className="absolute -top-8 left-0 bg-zinc-800 text-white px-3 py-1 rounded-t text-sm doc-label shadow-lg">Course Schedule</div>
-                <div className="shadow-2xl transition-shadow hover:shadow-blue-500/20">
-                    <ScheduleTemplate ref={scheduleRef} data={formData} />
-                </div>
-            </motion.div>
+                        <motion.div 
+                            drag 
+                            dragMomentum={false}
+                            className="relative group document-card"
+                        >
+                            <div className="absolute -top-8 left-0 bg-zinc-800 text-white px-3 py-1 rounded-t text-sm doc-label shadow-lg">Course Schedule</div>
+                            <div className="shadow-2xl transition-shadow hover:shadow-blue-500/20">
+                                <ScheduleTemplate ref={scheduleRef} data={formData} />
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                ) : (
+                    <motion.div 
+                        key="extra-canvas"
+                        className="absolute flex flex-row gap-10 p-20 origin-center"
+                        initial={{ opacity: 0, scale: scale * 0.9 }}
+                        animate={{ opacity: 1, scale: scale }}
+                        exit={{ opacity: 0, scale: scale * 0.9 }}
+                        transition={{ duration: 0.2 }}
+                        style={{
+                            width: 'max-content',
+                            height: 'max-content',
+                        }}
+                    >
+                        <motion.div 
+                            drag 
+                            dragMomentum={false}
+                            className="relative group document-card"
+                        >
+                            <div className="absolute -top-8 left-0 bg-zinc-800 text-white px-3 py-1 rounded-t text-sm doc-label shadow-lg">Admission Letter</div>
+                            <div className="shadow-2xl transition-shadow hover:shadow-blue-500/20">
+                                <AdmissionLetterTemplate ref={admissionRef} data={formData} />
+                            </div>
+                        </motion.div>
 
-            <motion.div 
-                drag 
-                dragMomentum={false}
-                className="relative group document-card"
-            >
-                <div className="absolute -top-8 left-0 bg-zinc-800 text-white px-3 py-1 rounded-t text-sm doc-label shadow-lg">Admission Letter</div>
-                <div className="shadow-2xl transition-shadow hover:shadow-blue-500/20">
-                    <AdmissionLetterTemplate ref={admissionRef} data={formData} />
-                </div>
-            </motion.div>
-
-            <motion.div 
-                drag 
-                dragMomentum={false}
-                className="relative group document-card"
-            >
-                <div className="absolute -top-8 left-0 bg-zinc-800 text-white px-3 py-1 rounded-t text-sm doc-label shadow-lg">Enrollment Cert</div>
-                <div className="shadow-2xl transition-shadow hover:shadow-blue-500/20">
-                    <EnrollmentCertificateTemplate ref={enrollmentRef} data={formData} />
-                </div>
-            </motion.div>
-        </motion.div>
+                        <motion.div 
+                            drag 
+                            dragMomentum={false}
+                            className="relative group document-card"
+                        >
+                            <div className="absolute -top-8 left-0 bg-zinc-800 text-white px-3 py-1 rounded-t text-sm doc-label shadow-lg">Enrollment Cert</div>
+                            <div className="shadow-2xl transition-shadow hover:shadow-blue-500/20">
+                                <EnrollmentCertificateTemplate ref={enrollmentRef} data={formData} />
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
       </div>
     </div>
   );
