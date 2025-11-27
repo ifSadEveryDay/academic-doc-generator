@@ -342,8 +342,9 @@ const App = () => {
       <div className={`
         ${sidebarCollapsed ? (isMobile ? 'w-0' : 'w-16') : (isMobile ? 'w-full' : 'w-80')} 
         ${isMobile && sidebarCollapsed ? 'hidden' : 'flex-shrink-0'} 
-        ${isMobile && !sidebarCollapsed ? 'absolute inset-0 z-50' : 'relative'} 
-        border-r border-divider bg-content1 z-20 flex flex-col transition-all duration-300
+        ${isMobile && !sidebarCollapsed ? 'fixed inset-0 z-50' : 'relative z-20'} 
+        border-r border-divider bg-content1 flex flex-col transition-all duration-300
+        ${isMobile && !sidebarCollapsed ? 'h-screen' : ''}
       `}>
         {sidebarCollapsed ? (
           /* Collapsed Sidebar - Gear Icon */
@@ -365,16 +366,8 @@ const App = () => {
         ) : (
           /* Expanded Sidebar */
           <>
-            {/* Mobile Backdrop */}
-            {isMobile && (
-              <div 
-                className="fixed inset-0 bg-black/50 z-40"
-                onClick={() => setSidebarCollapsed(true)}
-              />
-            )}
-            
             {/* Sticky Header with Button */}
-            <div className="sticky top-0 bg-content1 z-50 p-6 pb-4 border-b border-divider">
+            <div className={`sticky top-0 bg-content1 z-50 p-6 pb-4 border-b border-divider ${isMobile ? 'flex-shrink-0' : ''}`}>
               <div className="flex items-center justify-between mb-4">
                 <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-primary`}>
                   Input Information
@@ -409,7 +402,14 @@ const App = () => {
             </div>
             
             {/* Scrollable Content */}
-            <ScrollShadow className={`flex-1 p-6 pt-4 ${isMobile ? 'overflow-y-auto' : ''}`}>
+            <ScrollShadow 
+              className="flex-1 p-6 pt-4" 
+              style={isMobile ? { 
+                height: 'calc(100vh - 140px)', // Subtract header height
+                overflowY: 'auto',
+                WebkitOverflowScrolling: 'touch' // Enable smooth scrolling on iOS
+              } : {}}
+            >
           
           <div className="flex flex-col gap-6">
             <Input label="University Name" name="universityName" value={formData.universityName} onChange={handleInputChange} variant="bordered" labelPlacement="outside" placeholder="Enter university name" />
@@ -628,6 +628,15 @@ const App = () => {
           </>
         )}
       </div>
+
+      {/* Mobile Backdrop - Outside sidebar to prevent interference */}
+      {isMobile && !sidebarCollapsed && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40"
+          onClick={() => setSidebarCollapsed(true)}
+          style={{ touchAction: 'none' }}
+        />
+      )}
 
       {/* Mobile Floating Gear Button */}
       {isMobile && sidebarCollapsed && (
