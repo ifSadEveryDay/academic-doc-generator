@@ -276,18 +276,22 @@ const App = () => {
   return (
     <div className="flex h-screen overflow-hidden bg-background text-foreground">
       {/* Sidebar Controls */}
-      <div className="w-80 flex-shrink-0 border-r border-divider bg-content1 z-20">
-        <ScrollShadow className="h-full p-6">
+      <div className="w-80 flex-shrink-0 border-r border-divider bg-content1 z-20 flex flex-col">
+        {/* Sticky Header with Button */}
+        <div className="sticky top-0 bg-content1 z-30 p-6 pb-4 border-b border-divider">
           <h2 className="text-2xl font-bold mb-4 text-primary">Input Information</h2>
-
           <Button 
             color="secondary" 
             variant="flat"
-            className="w-full mb-6"
+            className="w-full"
             onClick={regenerateData}
           >
             Regenerate Random Data
           </Button>
+        </div>
+        
+        {/* Scrollable Content */}
+        <ScrollShadow className="flex-1 p-6 pt-4">
           
           <div className="flex flex-col gap-6">
             <Input label="University Name" name="universityName" value={formData.universityName} onChange={handleInputChange} variant="bordered" labelPlacement="outside" placeholder="Enter university name" />
