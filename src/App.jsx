@@ -509,6 +509,38 @@ const App = () => {
             </Button>
 
             <Divider className="my-4" />
+            <h3 className="text-xl font-semibold mb-2">Individual Downloads</h3>
+            <div className="flex flex-col gap-3">
+                <Button 
+                    color="default" 
+                    variant="flat" 
+                    className="w-full" 
+                    onClick={() => exportSingle(hiddenTuitionRef, "Tuition_Statement.png")}
+                    isLoading={isGenerating}
+                >
+                    Download Tuition Statement
+                </Button>
+                <Button 
+                    color="default" 
+                    variant="flat" 
+                    className="w-full" 
+                    onClick={() => exportSingle(hiddenTranscriptRef, "Transcript.png")}
+                    isLoading={isGenerating}
+                >
+                    Download Transcript
+                </Button>
+                <Button 
+                    color="default" 
+                    variant="flat" 
+                    className="w-full" 
+                    onClick={() => exportSingle(hiddenScheduleRef, "Schedule.png")}
+                    isLoading={isGenerating}
+                >
+                    Download Course Schedule
+                </Button>
+            </div>
+
+            <Divider className="my-4" />
             <h3 className="text-xl font-semibold mb-2">Extra Documents</h3>
             <div className="flex flex-col gap-3">
                 <Button 
