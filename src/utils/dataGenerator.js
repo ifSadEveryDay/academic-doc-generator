@@ -22,7 +22,7 @@ export const generateRandomData = () => {
   const lastName = faker.person.lastName();
 
   // Common Texas/US universities to choose from if desired, or just generic
-  const university = "Hachimi University"; 
+  const university = "Hudson County Community College"; 
 
   // Course Data Pool based on Major
   const majors = [
@@ -113,8 +113,8 @@ export const generateRandomData = () => {
     });
   };
 
-  const termCourses = generateCourses(selectedMajor.prefix, "Fall 2024");
-  const springCourses = generateCourses(selectedMajor.prefix, "Spring 2025");
+  const termCourses = generateCourses(selectedMajor.prefix, "Fall 2025");
+  const springCourses = generateCourses(selectedMajor.prefix, "Spring 2026");
 
   // Calculate GPA logic
   const calculateTermStats = (courses) => {
@@ -184,7 +184,7 @@ export const generateRandomData = () => {
     studentID: `${faker.string.numeric(6)}-${faker.string.numeric(4)}`,
     passportNumber: faker.string.alphanumeric(9).toUpperCase(), // Added passport
     address: `${faker.location.streetAddress()}, ${faker.location.city()}, ${faker.location.state()}`,
-    term: "Fall 2024", 
+    term: "Fall 2025", 
     major: selectedMajor.name, 
     program: selectedMajor.program,
     college: selectedMajor.college,
