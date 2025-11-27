@@ -59,15 +59,17 @@ const StudentCardFrontTemplate = forwardRef(({ data }, ref) => {
       {/* Body */}
       <div style={{
         flex: 1,
-        padding: '30px',
+        padding: '25px 30px',
         display: 'flex',
         gap: '30px',
-        background: '#fafafa'
+        background: '#fafafa',
+        overflow: 'hidden',
+        minHeight: 0
       }}>
         {/* Photo */}
         <div style={{
-          width: '150px',
-          height: '195px',
+          width: '140px',
+          height: '180px',
           background: '#e0e0e0',
           borderRadius: '9px',
           overflow: 'hidden',
@@ -139,7 +141,7 @@ const StudentCardFrontTemplate = forwardRef(({ data }, ref) => {
             ISSUE DATE
           </div>
           <div style={{ fontSize: '19px', fontWeight: 500, color: '#333' }}>
-            {data.cardIssueDate || '—'}
+            {data.cardIssueDate || '01/15/2023'}
           </div>
         </div>
         <div style={{ textAlign: 'center' }}>
@@ -147,7 +149,7 @@ const StudentCardFrontTemplate = forwardRef(({ data }, ref) => {
             VALID UNTIL
           </div>
           <div style={{ fontSize: '19px', fontWeight: 500, color: '#333' }}>
-            {data.cardValidDate || '—'}
+            {data.cardValidDate || '01/15/2027'}
           </div>
         </div>
       </div>
