@@ -46,7 +46,31 @@ const App = () => {
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [isPanning, setIsPanning] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
   const panStartRef = useRef({ x: 0, y: 0 });
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileDevice = window.innerWidth < 768;
+      setIsMobile(isMobileDevice);
+      
+      // Auto-collapse sidebar on mobile
+      if (isMobileDevice) {
+        setSidebarCollapsed(true);
+        // Set smaller scale for mobile
+        setScale(0.3);
+      } else {
+        // Reset to desktop scale
+        setScale(0.55);
+      }
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const tuitionRef = useRef(null);
   const transcriptRef = useRef(null);
@@ -276,10 +300,51 @@ const App = () => {
     setIsPanning(false);
   };
 
+  // Touch event handlers for mobile
+  const handleTouchStart = (e) => {
+    if (e.target.closest('.document-card')) return;
+    const touch = e.touches[0];
+    setIsPanning(true);
+    panStartRef.current = { x: touch.clientX - panOffset.x, y: touch.clientY - panOffset.y };
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isPanning) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    setPanOffset({
+      x: touch.clientX - panStartRef.current.x,
+      y: touch.clientY - panStartRef.current.y
+    });
+  };
+
+  const handleTouchEnd = () => {
+    setIsPanning(false);
+  };
+
+  // Copy to clipboard function
+  const copyToClipboard = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopySuccess(true);
+      // Hide success message after 2 seconds
+      setTimeout(() => {
+        setCopySuccess(false);
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy: ', err);
+    }
+  };
+
   return (
     <div className="flex h-screen overflow-hidden bg-background text-foreground">
       {/* Sidebar Controls */}
-      <div className={`${sidebarCollapsed ? 'w-16' : 'w-80'} flex-shrink-0 border-r border-divider bg-content1 z-20 flex flex-col transition-all duration-300`}>
+      <div className={`
+        ${sidebarCollapsed ? (isMobile ? 'w-0' : 'w-16') : (isMobile ? 'w-full' : 'w-80')} 
+        ${isMobile && sidebarCollapsed ? 'hidden' : 'flex-shrink-0'} 
+        ${isMobile && !sidebarCollapsed ? 'absolute inset-0 z-50' : 'relative'} 
+        border-r border-divider bg-content1 z-20 flex flex-col transition-all duration-300
+      `}>
         {sidebarCollapsed ? (
           /* Collapsed Sidebar - Gear Icon */
           <div className="flex flex-col items-center justify-start p-4">
@@ -300,21 +365,37 @@ const App = () => {
         ) : (
           /* Expanded Sidebar */
           <>
+            {/* Mobile Backdrop */}
+            {isMobile && (
+              <div 
+                className="fixed inset-0 bg-black/50 z-40"
+                onClick={() => setSidebarCollapsed(true)}
+              />
+            )}
+            
             {/* Sticky Header with Button */}
-            <div className="sticky top-0 bg-content1 z-30 p-6 pb-4 border-b border-divider">
+            <div className="sticky top-0 bg-content1 z-50 p-6 pb-4 border-b border-divider">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-primary">Input Information</h2>
+                <h2 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-primary`}>
+                  Input Information
+                </h2>
                 <Button
                   isIconOnly
                   color="default"
                   variant="light"
-                  size="sm"
+                  size={isMobile ? "md" : "sm"}
                   onClick={() => setSidebarCollapsed(true)}
                   aria-label="Collapse sidebar"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                  </svg>
+                  {isMobile ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                  )}
                 </Button>
               </div>
               <Button 
@@ -328,7 +409,7 @@ const App = () => {
             </div>
             
             {/* Scrollable Content */}
-            <ScrollShadow className="flex-1 p-6 pt-4">
+            <ScrollShadow className={`flex-1 p-6 pt-4 ${isMobile ? 'overflow-y-auto' : ''}`}>
           
           <div className="flex flex-col gap-6">
             <Input label="University Name" name="universityName" value={formData.universityName} onChange={handleInputChange} variant="bordered" labelPlacement="outside" placeholder="Enter university name" />
@@ -351,7 +432,44 @@ const App = () => {
                 />
             </div>
 
-            <Input label="Student Name" name="studentName" value={formData.studentName} onChange={handleInputChange} variant="bordered" labelPlacement="outside" placeholder="Enter student name" />
+            <div className="relative">
+              <Input 
+                label="Student Name" 
+                name="studentName" 
+                value={formData.studentName} 
+                onChange={handleInputChange} 
+                variant="bordered" 
+                labelPlacement="outside" 
+                placeholder="Enter student name"
+                endContent={
+                  <div className="flex items-center gap-2">
+                    {copySuccess && (
+                      <span className="text-success text-xs font-medium animate-pulse">
+                        Copied!
+                      </span>
+                    )}
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="light"
+                      className={`${copySuccess ? 'text-success' : 'text-default-400 hover:text-default-600'} transition-colors`}
+                      onClick={() => copyToClipboard(formData.studentName)}
+                      aria-label="Copy student name"
+                    >
+                      {copySuccess ? (
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                      ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.375A2.25 2.25 0 014.125 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+                        </svg>
+                      )}
+                    </Button>
+                  </div>
+                }
+              />
+            </div>
             <Input label="Student ID" name="studentID" value={formData.studentID} onChange={handleInputChange} variant="bordered" labelPlacement="outside" placeholder="Enter student ID" />
             <Input label="Address" name="address" value={formData.address} onChange={handleInputChange} variant="bordered" labelPlacement="outside" placeholder="Enter address" />
             <Input label="Term" name="term" value={formData.term} onChange={handleInputChange} variant="bordered" labelPlacement="outside" placeholder="Enter term" />
@@ -511,6 +629,22 @@ const App = () => {
         )}
       </div>
 
+      {/* Mobile Floating Gear Button */}
+      {isMobile && sidebarCollapsed && (
+        <Button
+          isIconOnly
+          color="primary"
+          className="fixed top-16 left-4 z-40 w-12 h-12 shadow-lg"
+          onClick={() => setSidebarCollapsed(false)}
+          aria-label="Open settings"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </Button>
+      )}
+
       {/* Hidden Export Containers - Rendered purely for capture */}
       {/* Positioned way off-screen to ensure no visual interference but valid DOM rendering */}
       <div style={{ position: 'absolute', top: '-9999px', left: '-9999px', display: 'flex', flexDirection: 'column' }}>
@@ -544,32 +678,36 @@ const App = () => {
 
       {/* Main Preview Area - Infinite Canvas Style */}
       <div 
-        className="flex-grow overflow-hidden bg-zinc-900 relative cursor-grab active:cursor-grabbing flex flex-col items-center justify-center"
-        onWheel={handleWheel}
-        onMouseDown={handlePanStart}
-        onMouseMove={handlePanMove}
-        onMouseUp={handlePanEnd}
-        onMouseLeave={handlePanEnd}
+        className={`flex-grow overflow-hidden bg-zinc-900 relative ${isMobile ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'} flex flex-col items-center justify-center`}
+        onWheel={!isMobile ? handleWheel : undefined}
+        onMouseDown={!isMobile ? handlePanStart : undefined}
+        onMouseMove={!isMobile ? handlePanMove : undefined}
+        onMouseUp={!isMobile ? handlePanEnd : undefined}
+        onMouseLeave={!isMobile ? handlePanEnd : undefined}
+        onTouchStart={isMobile ? handleTouchStart : undefined}
+        onTouchMove={isMobile ? handleTouchMove : undefined}
+        onTouchEnd={isMobile ? handleTouchEnd : undefined}
       >
         
         {/* Canvas Switcher Tabs - Floating at Top */}
-        <div className="absolute top-6 z-40">
+        <div className={`absolute ${isMobile ? 'top-2 left-20 right-2' : 'top-6'} z-40`}>
             <Tabs 
                 aria-label="Canvas Selection" 
                 color="primary" 
                 variant="bordered"
                 selectedKey={activeCanvas}
                 onSelectionChange={setActiveCanvas}
+                size={isMobile ? "sm" : "md"}
                 classNames={{
                     tabList: "bg-zinc-800/80 backdrop-blur-md border border-white/10 p-1 rounded-lg",
                     cursor: "bg-primary",
-                    tab: "h-10 px-6 text-sm",
+                    tab: `${isMobile ? 'h-8 px-3 text-xs' : 'h-10 px-6 text-sm'}`,
                     tabContent: "group-data-[selected=true]:text-white text-zinc-400 font-medium"
                 }}
             >
-                <Tab key="main" title="Standard Documents (3)" />
-                <Tab key="extra" title="Extra Documents (2)" />
-                <Tab key="card" title="Student ID Card" />
+                <Tab key="main" title={isMobile ? "Standard (3)" : "Standard Documents (3)"} />
+                <Tab key="extra" title={isMobile ? "Extra (2)" : "Extra Documents (2)"} />
+                <Tab key="card" title={isMobile ? "ID Card" : "Student ID Card"} />
             </Tabs>
         </div>
 
@@ -582,17 +720,31 @@ const App = () => {
         />
         
         {/* Zoom Controls */}
-        <div className="absolute bottom-8 right-8 flex gap-2 z-30">
-            <Button isIconOnly color="secondary" variant="flat" onClick={handleZoomOut} aria-label="Zoom Out">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+        <div className={`absolute ${isMobile ? 'bottom-4 right-4' : 'bottom-8 right-8'} flex gap-2 z-30`}>
+            <Button 
+                isIconOnly 
+                color="secondary" 
+                variant="flat" 
+                size={isMobile ? "sm" : "md"}
+                onClick={handleZoomOut} 
+                aria-label="Zoom Out"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={isMobile ? "w-4 h-4" : "w-6 h-6"}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12h-15" />
                 </svg>
             </Button>
-            <div className="bg-zinc-800 text-white px-3 py-2 rounded-lg flex items-center font-mono text-sm">
+            <div className={`bg-zinc-800 text-white ${isMobile ? 'px-2 py-1 text-xs' : 'px-3 py-2 text-sm'} rounded-lg flex items-center font-mono`}>
                 {Math.round(scale * 100)}%
             </div>
-            <Button isIconOnly color="secondary" variant="flat" onClick={handleZoomIn} aria-label="Zoom In">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+            <Button 
+                isIconOnly 
+                color="secondary" 
+                variant="flat" 
+                size={isMobile ? "sm" : "md"}
+                onClick={handleZoomIn} 
+                aria-label="Zoom In"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={isMobile ? "w-4 h-4" : "w-6 h-6"}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>
             </Button>
