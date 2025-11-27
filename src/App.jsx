@@ -6,6 +6,15 @@ import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { generateRandomData } from './utils/dataGenerator';
 
+// Import default student photos
+import img1 from './assets/images/img1.png';
+import img2 from './assets/images/img2.png';
+import img3 from './assets/images/img3.png';
+import img4 from './assets/images/img4.png';
+import img5 from './assets/images/img5.png';
+import img6 from './assets/images/img6.png';
+import img7 from './assets/images/img7.png';
+
 import TuitionTemplate from './components/TuitionTemplate';
 import TranscriptTemplate from './components/TranscriptTemplate';
 import ScheduleTemplate from './components/ScheduleTemplate';
@@ -13,6 +22,17 @@ import AdmissionLetterTemplate from './components/AdmissionLetterTemplate';
 import EnrollmentCertificateTemplate from './components/EnrollmentCertificateTemplate';
 import StudentCardFrontTemplate from './components/StudentCardFrontTemplate';
 import StudentCardBackTemplate from './components/StudentCardBackTemplate';
+
+// Default student photos array
+const defaultPhotos = [
+  { id: 1, src: img1, name: 'Student 1' },
+  { id: 2, src: img2, name: 'Student 2' },
+  { id: 3, src: img3, name: 'Student 3' },
+  { id: 4, src: img4, name: 'Student 4' },
+  { id: 5, src: img5, name: 'Student 5' },
+  { id: 6, src: img6, name: 'Student 6' },
+  { id: 7, src: img7, name: 'Student 7' }
+];
 
 const App = () => {
   const [formData, setFormData] = useState(generateRandomData());
@@ -59,11 +79,15 @@ const App = () => {
     }
   };
 
+  const handleDefaultPhotoSelect = (photoSrc) => {
+    setFormData(prev => ({ ...prev, studentPhoto: photoSrc }));
+  };
+
   const regenerateData = () => {
     setFormData(prev => ({
         ...generateRandomData(),
-        universityLogo: prev.universityLogo,
-        studentPhoto: prev.studentPhoto
+        universityLogo: prev.universityLogo
+        // Remove studentPhoto preservation to allow random switching
     }));
   };
 
@@ -350,21 +374,75 @@ const App = () => {
 
             <Divider className="my-4" />
             <h3 className="text-xl font-semibold mb-2">Student ID Card</h3>
+            
+            {/* Card Color Configuration */}
+            <div className="mb-4">
+                <label className="block text-sm font-medium text-foreground mb-2">Card Header Color</label>
+                <div className="flex items-center gap-3">
+                    <input 
+                        type="color" 
+                        name="cardColor"
+                        value={formData.cardColor || '#3e80cc'} 
+                        onChange={handleInputChange}
+                        className="w-12 h-10 rounded-lg border-2 border-gray-300 cursor-pointer"
+                        title="Choose card header color"
+                    />
+                    <Input 
+                        name="cardColor"
+                        value={formData.cardColor || '#3e80cc'} 
+                        onChange={handleInputChange}
+                        variant="bordered" 
+                        placeholder="#3e80cc"
+                        className="flex-1"
+                        size="sm"
+                    />
+                </div>
+            </div>
+            
             <div className="mb-4">
                 <label className="block text-sm font-medium text-foreground mb-2">Student Photo</label>
-                <input 
-                    type="file" 
-                    accept="image/*"
-                    onChange={handlePhotoUpload}
-                    className="block w-full text-sm text-slate-500
-                      file:mr-4 file:py-2 file:px-4
-                      file:rounded-full file:border-0
-                      file:text-sm file:font-semibold
-                      file:bg-violet-50 file:text-violet-700
-                      hover:file:bg-violet-100
-                      cursor-pointer
-                    "
-                />
+                
+                {/* Default Photos Selector */}
+                <div className="mb-4">
+                    <p className="text-sm text-gray-600 mb-3">Choose from default photos:</p>
+                    <div className="grid grid-cols-4 gap-2 mb-4">
+                        {defaultPhotos.map((photo) => (
+                            <div
+                                key={photo.id}
+                                className={`cursor-pointer border-2 rounded-lg overflow-hidden transition-all hover:scale-105 ${
+                                    formData.studentPhoto === photo.src 
+                                        ? 'border-primary ring-2 ring-primary/20' 
+                                        : 'border-gray-200 hover:border-gray-300'
+                                }`}
+                                onClick={() => handleDefaultPhotoSelect(photo.src)}
+                            >
+                                <img 
+                                    src={photo.src} 
+                                    alt={photo.name}
+                                    className="w-full h-16 object-cover"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Custom Photo Upload */}
+                <div className="mb-2">
+                    <p className="text-sm text-gray-600 mb-2">Or upload your own:</p>
+                    <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={handlePhotoUpload}
+                        className="block w-full text-sm text-slate-500
+                          file:mr-4 file:py-2 file:px-4
+                          file:rounded-full file:border-0
+                          file:text-sm file:font-semibold
+                          file:bg-violet-50 file:text-violet-700
+                          hover:file:bg-violet-100
+                          cursor-pointer
+                        "
+                    />
+                </div>
             </div>
             <div className="flex flex-col gap-3">
                 <Button 

@@ -1,5 +1,17 @@
 import { faker } from '@faker-js/faker';
 
+// Import default student photos
+import img1 from '../assets/images/img1.png';
+import img2 from '../assets/images/img2.png';
+import img3 from '../assets/images/img3.png';
+import img4 from '../assets/images/img4.png';
+import img5 from '../assets/images/img5.png';
+import img6 from '../assets/images/img6.png';
+import img7 from '../assets/images/img7.png';
+
+// Default photos array
+const defaultPhotos = [img1, img2, img3, img4, img5, img6, img7];
+
 export const generateRandomData = () => {
   // Generate a past date for statement
   const statementDate = faker.date.past({ years: 0.5 });
@@ -168,13 +180,19 @@ export const generateRandomData = () => {
   admissionDate.setMonth(faker.helpers.arrayElement([0, 1, 7, 8]));
   admissionDate.setDate(faker.number.int({ min: 15, max: 28 }));
 
-  // Student Card issued 1-4 weeks after admission
-  const cardIssueDate = new Date(admissionDate);
-  cardIssueDate.setDate(cardIssueDate.getDate() + faker.number.int({ min: 7, max: 28 }));
+  // Card Issue Date: not earlier than 3 months ago from current date
+  const currentDate = new Date();
+  const threeMonthsAgo = new Date(currentDate);
+  threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
   
-  // Valid for 4 years from issue
-  const cardValidDate = new Date(cardIssueDate);
-  cardValidDate.setFullYear(cardValidDate.getFullYear() + 4);
+  const cardIssueDate = faker.date.between({ 
+    from: threeMonthsAgo, 
+    to: currentDate 
+  });
+  
+  // Card Valid Date: 3 years from current year
+  const cardValidDate = new Date(currentDate);
+  cardValidDate.setFullYear(cardValidDate.getFullYear() + 3);
 
   return {
     universityName: university,
@@ -221,7 +239,7 @@ export const generateRandomData = () => {
     cardIssueDate: formatDate(cardIssueDate),
     cardValidDate: formatDate(cardValidDate),
     cardNotice: 'This card is the property of the university and must be returned upon request. If found, please return to the nearest university office.',
-    cardColor: faker.helpers.arrayElement(['#3b82f6', '#10b981', '#8b5cf6', '#ef4444', '#f59e0b', '#06b6d4', '#ec4899']),
-    studentPhoto: null
+    cardColor: '#3e80cc',
+    studentPhoto: faker.helpers.arrayElement(defaultPhotos)
   };
 };
