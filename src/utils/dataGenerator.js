@@ -8,9 +8,10 @@ import img4 from '../assets/images/img4.png';
 import img5 from '../assets/images/img5.png';
 import img6 from '../assets/images/img6.png';
 import img7 from '../assets/images/img7.png';
+import img8 from '../assets/images/img8.png';
 
 // Default photos array
-const defaultPhotos = [img1, img2, img3, img4, img5, img6, img7];
+const defaultPhotos = [img1, img2, img3, img4, img5, img6, img7, img8];
 
 export const generateRandomData = () => {
   // Generate a past date for statement

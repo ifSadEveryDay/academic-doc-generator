@@ -14,6 +14,7 @@ import img4 from './assets/images/img4.png';
 import img5 from './assets/images/img5.png';
 import img6 from './assets/images/img6.png';
 import img7 from './assets/images/img7.png';
+import img8 from './assets/images/img8.png';
 
 import TuitionTemplate from './components/TuitionTemplate';
 import TranscriptTemplate from './components/TranscriptTemplate';
@@ -31,7 +32,8 @@ const defaultPhotos = [
   { id: 4, src: img4, name: 'Student 4' },
   { id: 5, src: img5, name: 'Student 5' },
   { id: 6, src: img6, name: 'Student 6' },
-  { id: 7, src: img7, name: 'Student 7' }
+  { id: 7, src: img7, name: 'Student 7' },
+  { id: 8, src: img8, name: 'Student 8' }
 ];
 
 const App = () => {
