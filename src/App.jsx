@@ -19,6 +19,9 @@ const App = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [scale, setScale] = useState(0.45); 
   const [activeCanvas, setActiveCanvas] = useState("main"); // "main" or "extra"
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const panStartRef = useRef({ x: 0, y: 0 });
 
   const tuitionRef = useRef(null);
   const transcriptRef = useRef(null);
@@ -204,6 +207,12 @@ const App = () => {
   const handleZoomIn = () => setScale(prev => Math.min(prev + 0.1, 2));
   const handleZoomOut = () => setScale(prev => Math.max(prev - 0.1, 0.2));
 
+  const handleWheel = (e) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.05 : 0.05;
+    setScale(prev => Math.max(0.2, Math.min(2, prev + delta)));
+  };
+
   return (
     <div className="flex h-screen overflow-hidden bg-background text-foreground">
       {/* Sidebar Controls */}
@@ -330,7 +339,10 @@ const App = () => {
       </div>
 
       {/* Main Preview Area - Infinite Canvas Style */}
-      <div className="flex-grow overflow-hidden bg-zinc-900 relative cursor-grab active:cursor-grabbing flex flex-col items-center justify-center">
+      <div 
+        className="flex-grow overflow-hidden bg-zinc-900 relative cursor-grab active:cursor-grabbing flex flex-col items-center justify-center"
+        onWheel={handleWheel}
+      >
         
         {/* Canvas Switcher Tabs - Floating at Top */}
         <div className="absolute top-6 z-40">
