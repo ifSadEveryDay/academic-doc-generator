@@ -1,57 +1,5 @@
 import React, { forwardRef } from 'react';
-
-// Simple Barcode Generator Component
-const BarcodeGenerator = ({ value, width = 300, height = 35 }) => {
-  // Convert value to a string and create a more realistic barcode pattern
-  const barcodeValue = value.toString().replace(/[^0-9]/g, ''); // Keep only numbers
-  const bars = [];
-  
-  // Enhanced barcode pattern: each digit creates a longer pattern of bars (Code 128 style)
-  for (let i = 0; i < barcodeValue.length; i++) {
-    const digit = parseInt(barcodeValue[i]);
-    // Create a more detailed pattern based on the digit
-    const pattern = [
-      [1,1,0,1,0,0,1,0], // 0
-      [1,0,1,1,0,0,1,0], // 1
-      [1,0,0,1,1,0,1,0], // 2
-      [0,1,1,0,1,0,1,0], // 3
-      [0,1,0,1,1,0,1,0], // 4
-      [0,0,1,1,1,0,1,0], // 5
-      [1,1,1,0,0,1,0,0], // 6
-      [1,1,0,0,1,0,1,0], // 7
-      [1,0,1,0,1,0,1,0], // 8
-      [0,1,1,1,0,1,0,0]  // 9
-    ][digit];
-    
-    bars.push(...pattern);
-    // Add separator between digits
-    if (i < barcodeValue.length - 1) {
-      bars.push(0);
-    }
-  }
-  
-  // Add start and end patterns (longer for more realistic look)
-  const startPattern = [1,1,0,1,0,1];
-  const endPattern = [1,0,1,1,0,1];
-  const fullPattern = [...startPattern, ...bars, ...endPattern];
-  
-  const barWidth = width / fullPattern.length;
-  
-  return (
-    <svg width={width} height={height} style={{ display: 'block' }}>
-      {fullPattern.map((bar, index) => (
-        <rect
-          key={index}
-          x={index * barWidth}
-          y={0}
-          width={barWidth}
-          height={height}
-          fill={bar ? '#000' : 'transparent'}
-        />
-      ))}
-    </svg>
-  );
-};
+import RealisticBarcodeGenerator from './RealisticBarcodeGenerator';
 
 const StudentCardFrontTemplate = forwardRef(({ data }, ref) => {
   return (
@@ -200,8 +148,8 @@ const StudentCardFrontTemplate = forwardRef(({ data }, ref) => {
         
         {/* Barcode */}
         <div style={{ textAlign: 'center' }}>
-          <BarcodeGenerator value={data.studentID || '123456-7890'} />
-          <div style={{ fontSize: '11px', color: '#666', marginTop: '2px', letterSpacing: '1px' }}>
+          <RealisticBarcodeGenerator value={data.studentID || '123456-7890'} width={180} height={30} />
+          <div style={{ fontSize: '10px', color: '#666', marginTop: '3px', letterSpacing: '1px', fontFamily: 'monospace' }}>
             {data.studentID || '123456-7890'}
           </div>
         </div>

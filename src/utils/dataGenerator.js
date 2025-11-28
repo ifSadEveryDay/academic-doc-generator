@@ -241,6 +241,99 @@ export const generateRandomData = () => {
     cardValidDate: formatDate(cardValidDate),
     cardNotice: 'This card is the property of the university and must be returned upon request. If found, please return to the nearest university office.',
     cardColor: '#3e80cc',
-    studentPhoto: faker.helpers.arrayElement(defaultPhotos)
+    studentPhoto: faker.helpers.arrayElement(defaultPhotos),
+    
+    // Teacher Card specific
+    teacherName: `${firstName} ${lastName}`,
+    teacherID: `FAC${faker.string.numeric(4)}`,
+    teacherPhoto: faker.helpers.arrayElement(defaultPhotos),
+    department: faker.helpers.arrayElement([
+      'Department of Computer Science',
+      'Department of Mathematics',
+      'Department of Physics',
+      'Department of Chemistry',
+      'Department of Biology',
+      'Department of Psychology',
+      'Department of English Literature',
+      'Department of History',
+      'Department of Economics',
+      'Department of Business Administration'
+    ]),
+    position: faker.helpers.arrayElement([
+      'Full Professor', 
+      'Associate Professor', 
+      'Assistant Professor', 
+      'Distinguished Professor',
+      'Professor Emeritus',
+      'Clinical Professor',
+      'Research Professor'
+    ]),
+    employmentStartDate: formatDate(faker.date.past({ years: faker.number.int({ min: 2, max: 20 }) })),
+    teacherCardSubtitle: 'FACULTY IDENTIFICATION CARD',
+    teacherCardNotice: 'This faculty identification card is the property of the university and grants access to restricted academic facilities, laboratories, and administrative areas. This card must be displayed at all times while on campus. Loss or theft must be reported immediately to Campus Security.',
+    officeRoom: `Room ${faker.number.int({ min: 100, max: 999 })}`,
+    phoneExtension: faker.string.numeric(4),
+    
+    // Official Letter specific
+    presidentName: faker.helpers.arrayElement([
+      'Margaret Thompson',
+      'Robert Anderson',
+      'Elizabeth Davis',
+      'Michael Johnson',
+      'Sarah Williams',
+      'David Brown',
+      'Jennifer Miller',
+      'Christopher Wilson'
+    ]),
+    letterDate: formatDate(new Date()),
+    referenceNumber: `AA-${new Date().getFullYear()}-${faker.string.numeric(4)}`,
+    verificationCode: faker.string.alphanumeric(9).toUpperCase(),
+    
+    // Payroll data
+    employmentType: faker.helpers.arrayElement(['Full-Time Faculty', 'Associate Faculty', 'Adjunct Professor', 'Research Faculty', 'Clinical Faculty']),
+    baseSalary: faker.number.int({ min: 7500, max: 12000 }),
+    researchStipend: faker.number.int({ min: 800, max: 1500 }),
+    overloadRate: faker.number.int({ min: 75, max: 95 }),
+    overloadHours: faker.number.int({ min: 8, max: 20 }),
+    checkNumber: `CHK${faker.number.int({ min: 100000, max: 999999 })}`,
+    bankName: faker.helpers.arrayElement(['First National Bank', 'City Trust Bank', 'University Credit Union', 'Regional Savings Bank', 'Community Bank']),
+    accountLastFour: faker.string.numeric(4),
+    
+    // Calculate earnings
+    get overloadPay() { return this.overloadRate * this.overloadHours; },
+    get totalEarnings() { return this.baseSalary + this.researchStipend + this.overloadPay; },
+    
+    // Calculate deductions (realistic percentages)
+    get federalTax() { return Math.round(this.totalEarnings * 0.22 * 100) / 100; },
+    get stateTax() { return Math.round(this.totalEarnings * 0.05 * 100) / 100; },
+    get socialSecurity() { return Math.round(this.totalEarnings * 0.062 * 100) / 100; },
+    get medicare() { return Math.round(this.totalEarnings * 0.0145 * 100) / 100; },
+    healthInsurance: faker.number.int({ min: 250, max: 350 }),
+    get retirement() { return Math.round(this.totalEarnings * 0.10 * 100) / 100; },
+    dentalInsurance: faker.number.int({ min: 25, max: 35 }),
+    
+    get totalDeductions() { 
+      return this.federalTax + this.stateTax + this.socialSecurity + this.medicare + 
+             this.healthInsurance + this.retirement + this.dentalInsurance; 
+    },
+    get netPay() { return Math.round((this.totalEarnings - this.totalDeductions) * 100) / 100; },
+    
+    // YTD calculations (9 months)
+    get ytdBaseSalary() { return this.baseSalary * 9; },
+    get ytdResearchStipend() { return this.researchStipend * 9; },
+    get ytdOverloadPay() { return this.overloadPay * 6; }, // Not every month
+    get ytdTotalEarnings() { return this.ytdBaseSalary + this.ytdResearchStipend + this.ytdOverloadPay; },
+    get ytdFederalTax() { return Math.round(this.ytdTotalEarnings * 0.22 * 100) / 100; },
+    get ytdStateTax() { return Math.round(this.ytdTotalEarnings * 0.05 * 100) / 100; },
+    get ytdSocialSecurity() { return Math.round(this.ytdTotalEarnings * 0.062 * 100) / 100; },
+    get ytdMedicare() { return Math.round(this.ytdTotalEarnings * 0.0145 * 100) / 100; },
+    get ytdHealthInsurance() { return this.healthInsurance * 9; },
+    get ytdRetirement() { return Math.round(this.ytdTotalEarnings * 0.10 * 100) / 100; },
+    get ytdDentalInsurance() { return this.dentalInsurance * 9; },
+    get ytdTotalDeductions() { 
+      return this.ytdFederalTax + this.ytdStateTax + this.ytdSocialSecurity + this.ytdMedicare + 
+             this.ytdHealthInsurance + this.ytdRetirement + this.ytdDentalInsurance; 
+    },
+    get ytdNetPay() { return Math.round((this.ytdTotalEarnings - this.ytdTotalDeductions) * 100) / 100; }
   };
 };
