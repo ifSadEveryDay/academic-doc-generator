@@ -34,7 +34,7 @@ export const generateRandomData = () => {
   const firstName = faker.person.firstName();
   const lastName = faker.person.lastName();
 
-  // Common Texas/US universities to choose from if desired, or just generic
+  // Default university (not randomized)
   const university = "Hudson County Community College"; 
 
   // Course Data Pool based on Major

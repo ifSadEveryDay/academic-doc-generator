@@ -448,7 +448,19 @@ const App = () => {
             >
           
           <div className="flex flex-col gap-6">
-            <Input label="University Name" name="universityName" value={formData.universityName} onChange={handleInputChange} variant="bordered" labelPlacement="outside" placeholder="Enter university name" />
+            <Select 
+              label="University Name" 
+              name="universityName" 
+              selectedKeys={[formData.universityName]} 
+              onChange={(e) => setFormData(prev => ({ ...prev, universityName: e.target.value }))}
+              variant="bordered"
+              labelPlacement="outside"
+            >
+              <SelectItem key="Northwest Florida State College" value="Northwest Florida State College">Northwest Florida State College</SelectItem>
+              <SelectItem key="Arkansas Tech University" value="Arkansas Tech University">Arkansas Tech University</SelectItem>
+              <SelectItem key="Auburn University at Montgomery" value="Auburn University at Montgomery">Auburn University at Montgomery</SelectItem>
+              <SelectItem key="Hudson County Community College" value="Hudson County Community College">Hudson County Community College</SelectItem>
+            </Select>
             <Input label="University Address" name="universityAddress" value={formData.universityAddress} onChange={handleInputChange} variant="bordered" labelPlacement="outside" placeholder="Enter university address" />
             
             <div>
