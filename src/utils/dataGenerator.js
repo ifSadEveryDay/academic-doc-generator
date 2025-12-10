@@ -13,6 +13,45 @@ import img8 from '../assets/images/img8.png';
 // Default photos array
 const defaultPhotos = [img1, img2, img3, img4, img5, img6, img7, img8];
 
+// Track generated names to ensure uniqueness
+const generatedNames = new Set();
+
+// Generate random name with 6-8 letters, first letter capitalized
+const generateRandomName = () => {
+  const length = faker.number.int({ min: 6, max: 8 });
+  const letters = faker.string.alpha({ length: length, casing: 'lower' });
+  return letters.charAt(0).toUpperCase() + letters.slice(1);
+};
+
+// Generate unique student name
+const generateUniqueName = () => {
+  let attempts = 0;
+  const maxAttempts = 100;
+  
+  while (attempts < maxAttempts) {
+    const firstName = generateRandomName();
+    const lastName = generateRandomName();
+    const fullName = `${lastName} ${firstName}`;
+    
+    // Check if name is unique
+    if (!generatedNames.has(fullName)) {
+      generatedNames.add(fullName);
+      return { firstName, lastName, fullName };
+    }
+    
+    attempts++;
+  }
+  
+  // Fallback: append unique number if all attempts failed (extremely unlikely)
+  const firstName = generateRandomName();
+  const lastName = generateRandomName();
+  const uniqueId = faker.string.numeric(2);
+  const fullName = `${lastName} ${firstName}${uniqueId}`;
+  generatedNames.add(fullName);
+  
+  return { firstName, lastName, fullName };
+};
+
 export const generateRandomData = () => {
   // Generate a past date for statement
   const statementDate = faker.date.past({ years: 0.5 });
@@ -31,8 +70,7 @@ export const generateRandomData = () => {
     });
   };
 
-  const firstName = faker.person.firstName();
-  const lastName = faker.person.lastName();
+  const { firstName, lastName, fullName } = generateUniqueName();
 
   // Default university (not randomized)
   const university = "Hudson County Community College"; 
@@ -199,7 +237,7 @@ export const generateRandomData = () => {
     universityName: university,
     universityLogo: '/university-logo.png',
     universityAddress: `${faker.number.int({min: 100, max: 9999})} University Blvd, ${faker.location.city()}, ${faker.location.state({ abbreviated: true })}, ${faker.location.zipCode()}`,
-    studentName: `${lastName} ${firstName}`, 
+    studentName: fullName, 
     studentID: `${faker.string.numeric(6)}-${faker.string.numeric(4)}`,
     passportNumber: faker.string.alphanumeric(9).toUpperCase(), // Added passport
     address: `${faker.location.streetAddress()}, ${faker.location.city()}, ${faker.location.state()}`,

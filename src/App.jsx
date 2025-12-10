@@ -117,6 +117,7 @@ const App = () => {
   const regenerateData = () => {
     setFormData(prev => ({
         ...generateRandomData(),
+        universityName: prev.universityName,
         universityLogo: prev.universityLogo
         // Remove studentPhoto and teacherPhoto preservation to allow random switching
     }));
