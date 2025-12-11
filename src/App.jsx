@@ -23,6 +23,7 @@ import AdmissionLetterTemplate from './components/AdmissionLetterTemplate';
 import EnrollmentCertificateTemplate from './components/EnrollmentCertificateTemplate';
 import StudentCardFrontTemplate from './components/StudentCardFrontTemplate';
 import StudentCardBackTemplate from './components/StudentCardBackTemplate';
+import ArcadiaStudentIDTemplate from './components/ArcadiaStudentIDTemplate';
 import TeacherCardFrontTemplate from './components/TeacherCardFrontTemplate';
 import TeacherCardBackTemplate from './components/TeacherCardBackTemplate';
 import TeacherOfficialLetterTemplate from './components/TeacherOfficialLetterTemplate';
@@ -246,6 +247,8 @@ const App = () => {
   const hiddenCardBackRef = useRef(null);
   const cardFrontRef = useRef(null);
   const cardBackRef = useRef(null);
+  const hiddenArcadiaCardRef = useRef(null);
+  const arcadiaCardRef = useRef(null);
   const hiddenTeacherCardFrontRef = useRef(null);
   const hiddenTeacherCardBackRef = useRef(null);
   const teacherCardFrontRef = useRef(null);
@@ -587,6 +590,33 @@ const App = () => {
                 >
                     Download Course Schedule
                 </Button>
+                <Button 
+                    color="default" 
+                    variant="flat" 
+                    className="w-full" 
+                    onClick={() => exportSingle(hiddenCardFrontRef, "Student_ID_Front.png")}
+                    isLoading={isGenerating}
+                >
+                    Download Student ID Front
+                </Button>
+                <Button 
+                    color="default" 
+                    variant="flat" 
+                    className="w-full" 
+                    onClick={() => exportSingle(hiddenCardBackRef, "Student_ID_Back.png")}
+                    isLoading={isGenerating}
+                >
+                    Download Student ID Back
+                </Button>
+                <Button 
+                    color="primary" 
+                    variant="flat" 
+                    className="w-full" 
+                    onClick={() => exportSingle(hiddenArcadiaCardRef, "Student_IDCard.png")}
+                    isLoading={isGenerating}
+                >
+                    Download Vertical ID Card
+                </Button>
             </div>
 
             <Divider className="my-4" />
@@ -613,7 +643,7 @@ const App = () => {
             </div>
 
             <Divider className="my-4" />
-            <h3 className="text-xl font-semibold mb-2">Student ID Card</h3>
+            <h3 className="text-xl font-semibold mb-2">Student Card Configuration</h3>
             
             {/* Card Color Configuration */}
             <div className="mb-4">
@@ -683,26 +713,6 @@ const App = () => {
                         "
                     />
                 </div>
-            </div>
-            <div className="flex flex-col gap-3">
-                <Button 
-                    color="default" 
-                    variant="flat" 
-                    className="w-full" 
-                    onClick={() => exportSingle(hiddenCardFrontRef, "Student_ID_Front.png")}
-                    isLoading={isGenerating}
-                >
-                    Download ID Front
-                </Button>
-                <Button 
-                    color="default" 
-                    variant="flat" 
-                    className="w-full" 
-                    onClick={() => exportSingle(hiddenCardBackRef, "Student_ID_Back.png")}
-                    isLoading={isGenerating}
-                >
-                    Download ID Back
-                </Button>
             </div>
 
             <Divider className="my-4" />
@@ -919,6 +929,9 @@ const App = () => {
           </div>
           <div style={{ backgroundColor: 'white', width: '750px', height: '480px' }}>
             <StudentCardBackTemplate ref={hiddenCardBackRef} data={formData} />
+          </div>
+          <div style={{ backgroundColor: 'white', width: '450px', height: '680px', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+            <ArcadiaStudentIDTemplate ref={hiddenArcadiaCardRef} data={formData} />
           </div>
           
           {/* Teacher ID Card */}
@@ -1137,6 +1150,17 @@ const App = () => {
                             <div className="absolute -top-8 left-0 bg-zinc-800 text-white px-3 py-1 rounded-t text-sm doc-label shadow-lg">Student ID (Back)</div>
                             <div className="shadow-2xl transition-shadow hover:shadow-blue-500/20">
                                 <StudentCardBackTemplate ref={cardBackRef} data={formData} />
+                            </div>
+                        </motion.div>
+
+                        <motion.div 
+                            drag 
+                            dragMomentum={false}
+                            className="relative group document-card"
+                        >
+                            <div className="absolute -top-8 left-0 bg-zinc-800 text-white px-3 py-1 rounded-t text-sm doc-label shadow-lg">Student ID</div>
+                            <div className="shadow-2xl transition-shadow hover:shadow-blue-500/20">
+                                <ArcadiaStudentIDTemplate ref={arcadiaCardRef} data={formData} />
                             </div>
                         </motion.div>
                     </motion.div>
