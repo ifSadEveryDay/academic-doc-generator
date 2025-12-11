@@ -231,6 +231,28 @@ export const generateRandomData = () => {
     
     const combined = [...myMajorCourses, ...myCommonCourses];
     
+    // Generate schedule details for each course
+    const dayOptions = [
+      ['Mon', 'Wed', 'Fri'],
+      ['Tue', 'Thu'],
+      ['Mon', 'Wed'],
+      ['Tue', 'Thu'],
+    ];
+    
+    const timeSlots = [
+      '8:00 AM - 8:50 AM',
+      '9:00 AM - 9:50 AM',
+      '10:00 AM - 10:50 AM',
+      '11:00 AM - 11:50 AM',
+      '12:00 PM - 12:50 PM',
+      '1:00 PM - 1:50 PM',
+      '2:00 PM - 2:50 PM',
+      '3:00 PM - 3:50 PM',
+      '4:00 PM - 4:50 PM',
+    ];
+    
+    const buildings = ['DERR', 'ALKEK', 'CENT', 'JOWERS', 'NUECES', 'SUPPLE', 'EVANS'];
+    
     // Generate Grades and Quality Points
     return combined.map(c => {
         const gradePool = ['A', 'A', 'A', 'A', 'B', 'B']; // Heavily skew towards A and B to ensure passing and realistic "good student" GPA
@@ -241,11 +263,25 @@ export const generateRandomData = () => {
         else if(grade === 'C') pointsPerHour = 2;
         else if(grade === 'D') pointsPerHour = 1;
         
+        // Generate schedule info
+        const days = faker.helpers.arrayElement(dayOptions);
+        const time = faker.helpers.arrayElement(timeSlots);
+        const building = faker.helpers.arrayElement(buildings);
+        const room = faker.number.int({ min: 100, max: 499 });
+        const instructorLastName = faker.helpers.arrayElement(lastNames);
+        const instructorInitial = faker.helpers.arrayElement(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M', 'N', 'P', 'R', 'S', 'T', 'W']);
+        
         return {
             ...c,
             grade: grade,
             qualityPoints: (c.hours * pointsPerHour).toFixed(2),
-            hours: c.hours.toFixed(2)
+            hours: c.hours.toFixed(2),
+            // Schedule specific fields
+            days: days.join(', '),
+            time: time,
+            location: `${building} ${room}`,
+            instructor: `${instructorLastName}, ${instructorInitial}.`,
+            section: faker.number.int({ min: 1, max: 9 }).toString().padStart(3, '0')
         };
     });
   };
