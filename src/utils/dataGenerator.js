@@ -126,14 +126,27 @@ const generateUniqueName = () => {
 };
 
 export const generateRandomData = () => {
-  // Generate a past date for statement
-  const statementDate = faker.date.past({ years: 0.5 });
-  // Due date is typically 2-4 weeks after statement
+  // Generate dates within the past 2 months from current date
+  const currentDate = new Date();
+  const twoMonthsAgo = new Date(currentDate);
+  twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+  
+  // Generate a statement date within past 2 months (but leave room for due date)
+  const oneMonthAgo = new Date(currentDate);
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+  const statementDate = faker.date.between({ from: twoMonthsAgo, to: oneMonthAgo });
+  
+  // Due date is typically 2-4 weeks after statement, but ensure it doesn't exceed current date
   const dueDate = new Date(statementDate);
   dueDate.setDate(dueDate.getDate() + faker.number.int({ min: 14, max: 30 }));
+  // If due date exceeds current date, cap it at current date - 1 day
+  if (dueDate > currentDate) {
+    dueDate.setTime(currentDate.getTime());
+    dueDate.setDate(dueDate.getDate() - 1);
+  }
   
-  // Issue date typically current or very recent
-  const issueDate = faker.date.recent({ days: 5 });
+  // Issue date within past 2 months
+  const issueDate = faker.date.between({ from: twoMonthsAgo, to: currentDate });
   
   const formatDate = (date) => {
     return date.toLocaleDateString('en-US', {
@@ -293,7 +306,6 @@ export const generateRandomData = () => {
   admissionDate.setDate(faker.number.int({ min: 15, max: 28 }));
 
   // Card Issue Date: not earlier than 3 months ago from current date
-  const currentDate = new Date();
   const threeMonthsAgo = new Date(currentDate);
   threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
   
