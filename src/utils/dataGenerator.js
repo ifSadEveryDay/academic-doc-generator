@@ -16,40 +16,113 @@ const defaultPhotos = [img1, img2, img3, img4, img5, img6, img7, img8];
 // Track generated names to ensure uniqueness
 const generatedNames = new Set();
 
-// Generate random name with 6-8 letters, first letter capitalized
-const generateRandomName = () => {
-  const length = faker.number.int({ min: 6, max: 8 });
-  const letters = faker.string.alpha({ length: length, casing: 'lower' });
-  return letters.charAt(0).toUpperCase() + letters.slice(1);
-};
+// Extended first names dataset
+const firstNames = [
+  // Male names
+  'James', 'John', 'Robert', 'Michael', 'William', 'David', 'Richard', 'Joseph', 'Thomas', 'Charles',
+  'Christopher', 'Daniel', 'Matthew', 'Anthony', 'Mark', 'Donald', 'Steven', 'Paul', 'Andrew', 'Joshua',
+  'Kenneth', 'Kevin', 'Brian', 'George', 'Timothy', 'Ronald', 'Edward', 'Jason', 'Jeffrey', 'Ryan',
+  'Jacob', 'Gary', 'Nicholas', 'Eric', 'Jonathan', 'Stephen', 'Larry', 'Justin', 'Scott', 'Brandon',
+  'Benjamin', 'Samuel', 'Raymond', 'Gregory', 'Alexander', 'Patrick', 'Frank', 'Dennis', 'Jerry', 'Tyler',
+  'Aaron', 'Jose', 'Adam', 'Nathan', 'Henry', 'Douglas', 'Zachary', 'Peter', 'Kyle', 'Walter',
+  'Ethan', 'Jeremy', 'Harold', 'Keith', 'Christian', 'Roger', 'Noah', 'Gerald', 'Carl', 'Terry',
+  'Sean', 'Austin', 'Arthur', 'Lawrence', 'Jesse', 'Dylan', 'Bryan', 'Joe', 'Jordan', 'Billy',
+  'Bruce', 'Albert', 'Willie', 'Gabriel', 'Logan', 'Alan', 'Juan', 'Wayne', 'Elijah', 'Randy',
+  'Roy', 'Vincent', 'Ralph', 'Eugene', 'Russell', 'Bobby', 'Mason', 'Philip', 'Louis', 'Caleb',
+  'Jack', 'Luke', 'Isaac', 'Levi', 'Oliver', 'Owen', 'Liam', 'Connor', 'Jayden', 'Carter',
+  'Hunter', 'Landon', 'Wyatt', 'Colton', 'Cooper', 'Parker', 'Bentley', 'Chase', 'Hudson', 'Easton',
+  'Adrian', 'Ian', 'Brayden', 'Carson', 'Nolan', 'Cole', 'Axel', 'Jaxon', 'Tristan', 'Blake',
+  'Dominic', 'Maxwell', 'Miles', 'Sawyer', 'Gavin', 'Leonardo', 'Micah', 'Ezra', 'Wesley', 'Damian',
+  'Vincent', 'Silas', 'Everett', 'Maddox', 'Kai', 'Declan', 'Rowan', 'Harrison', 'Grayson', 'Asher',
+  'Felix', 'Jasper', 'Theo', 'Finn', 'Rhys', 'August', 'Elliot', 'Emmett', 'Atticus', 'Beckett',
+  'Graham', 'Knox', 'Archer', 'Milo', 'Jude', 'Oscar', 'Jonah', 'Ryker', 'Ryder', 'Arlo',
+  'Simon', 'Tobias', 'Zane', 'Ronan', 'Callum', 'Cody', 'Tanner', 'Travis', 'Garrett', 'Derek',
+  'Marcus', 'Spencer', 'Preston', 'Trenton', 'Shane', 'Sergio', 'Cesar', 'Ivan', 'Edgar', 'Hector',
+  'Fernando', 'Ricardo', 'Armando', 'Jorge', 'Andre', 'Raul', 'Marco', 'Rafael', 'Pedro', 'Miguel',
+  // Female names
+  'Mary', 'Patricia', 'Jennifer', 'Linda', 'Barbara', 'Elizabeth', 'Susan', 'Jessica', 'Sarah', 'Karen',
+  'Lisa', 'Nancy', 'Betty', 'Margaret', 'Sandra', 'Ashley', 'Kimberly', 'Emily', 'Donna', 'Michelle',
+  'Carol', 'Amanda', 'Dorothy', 'Melissa', 'Deborah', 'Stephanie', 'Rebecca', 'Sharon', 'Laura', 'Cynthia',
+  'Kathleen', 'Amy', 'Angela', 'Shirley', 'Anna', 'Brenda', 'Pamela', 'Emma', 'Nicole', 'Helen',
+  'Samantha', 'Katherine', 'Christine', 'Debra', 'Rachel', 'Carolyn', 'Janet', 'Catherine', 'Maria', 'Heather',
+  'Diane', 'Ruth', 'Julie', 'Olivia', 'Joyce', 'Virginia', 'Victoria', 'Kelly', 'Lauren', 'Christina',
+  'Joan', 'Evelyn', 'Judith', 'Megan', 'Andrea', 'Cheryl', 'Hannah', 'Jacqueline', 'Martha', 'Gloria',
+  'Teresa', 'Ann', 'Sara', 'Madison', 'Frances', 'Kathryn', 'Janice', 'Jean', 'Abigail', 'Alice',
+  'Judy', 'Sophia', 'Grace', 'Denise', 'Amber', 'Doris', 'Marilyn', 'Danielle', 'Beverly', 'Isabella',
+  'Theresa', 'Diana', 'Natalie', 'Brittany', 'Charlotte', 'Marie', 'Kayla', 'Alexis', 'Lori', 'Ava',
+  'Mia', 'Ella', 'Lily', 'Chloe', 'Zoe', 'Scarlett', 'Aria', 'Layla', 'Riley', 'Nora',
+  'Hazel', 'Ellie', 'Luna', 'Stella', 'Aurora', 'Violet', 'Nova', 'Willow', 'Lucy', 'Ruby',
+  'Claire', 'Audrey', 'Bella', 'Maya', 'Elena', 'Savannah', 'Brooklyn', 'Skylar', 'Paisley', 'Everly',
+  'Anna', 'Caroline', 'Kennedy', 'Autumn', 'Piper', 'Quinn', 'Naomi', 'Eliana', 'Delilah', 'Ivy',
+  'Josephine', 'Madeline', 'Allison', 'Gabriella', 'Serenity', 'Ariana', 'Penelope', 'Adalyn', 'Kinsley', 'Mackenzie',
+  'Gianna', 'Valentina', 'Isabelle', 'Vivian', 'Annabelle', 'Emilia', 'Reagan', 'Julia', 'Juliana', 'Melody',
+  'Lydia', 'Athena', 'Brielle', 'Camila', 'Eloise', 'Gemma', 'Iris', 'Jasmine', 'Keira', 'Lila',
+  'Mabel', 'Nina', 'Ophelia', 'Pearl', 'Rose', 'Sienna', 'Tessa', 'Vera', 'Wren', 'Ximena',
+  'Yara', 'Zelda', 'Adriana', 'Bianca', 'Cecilia', 'Daphne', 'Eden', 'Faith', 'Giselle', 'Hope',
+  'Imogen', 'Jade', 'Karina', 'Leah', 'Mariana', 'Nadia', 'Paige', 'Raquel', 'Serena', 'Talia'
+];
 
-// Generate unique student name
+// Extended last names dataset
+const lastNames = [
+  'Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez',
+  'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin',
+  'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson',
+  'Walker', 'Young', 'Allen', 'King', 'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill', 'Flores',
+  'Green', 'Adams', 'Nelson', 'Baker', 'Hall', 'Rivera', 'Campbell', 'Mitchell', 'Carter', 'Roberts',
+  'Gomez', 'Phillips', 'Evans', 'Turner', 'Diaz', 'Parker', 'Cruz', 'Edwards', 'Collins', 'Reyes',
+  'Stewart', 'Morris', 'Morales', 'Murphy', 'Cook', 'Rogers', 'Gutierrez', 'Ortiz', 'Morgan', 'Cooper',
+  'Peterson', 'Bailey', 'Reed', 'Kelly', 'Howard', 'Ramos', 'Kim', 'Cox', 'Ward', 'Richardson',
+  'Watson', 'Brooks', 'Chavez', 'Wood', 'James', 'Bennett', 'Gray', 'Mendoza', 'Ruiz', 'Hughes',
+  'Price', 'Alvarez', 'Castillo', 'Sanders', 'Patel', 'Myers', 'Long', 'Ross', 'Foster', 'Jimenez',
+  'Powell', 'Jenkins', 'Perry', 'Russell', 'Sullivan', 'Bell', 'Coleman', 'Butler', 'Henderson', 'Barnes',
+  'Gonzales', 'Fisher', 'Vasquez', 'Simmons', 'Romero', 'Jordan', 'Patterson', 'Alexander', 'Hamilton', 'Graham',
+  'Reynolds', 'Griffin', 'Wallace', 'Moreno', 'West', 'Cole', 'Hayes', 'Bryant', 'Herrera', 'Gibson',
+  'Ellis', 'Tran', 'Medina', 'Aguilar', 'Stevens', 'Murray', 'Ford', 'Castro', 'Marshall', 'Owens',
+  'Harrison', 'Fernandez', 'McDonald', 'Woods', 'Washington', 'Kennedy', 'Wells', 'Vargas', 'Henry', 'Chen',
+  'Freeman', 'Webb', 'Tucker', 'Guzman', 'Burns', 'Crawford', 'Olson', 'Simpson', 'Porter', 'Hunter',
+  'Gordon', 'Mendez', 'Silva', 'Shaw', 'Snyder', 'Mason', 'Dixon', 'Munoz', 'Hunt', 'Hicks',
+  'Holmes', 'Palmer', 'Wagner', 'Black', 'Robertson', 'Boyd', 'Rose', 'Stone', 'Salazar', 'Fox',
+  'Warren', 'Mills', 'Meyer', 'Rice', 'Schmidt', 'Garza', 'Daniels', 'Ferguson', 'Nichols', 'Stephens',
+  'Soto', 'Weaver', 'Ryan', 'Gardner', 'Payne', 'Grant', 'Dunn', 'Kelley', 'Spencer', 'Hawkins',
+  'Arnold', 'Pierce', 'Vazquez', 'Hansen', 'Peters', 'Santos', 'Hart', 'Bradley', 'Knight', 'Elliott',
+  'Cunningham', 'Duncan', 'Armstrong', 'Hudson', 'Carroll', 'Lane', 'Riley', 'Andrews', 'Alvarado', 'Ray',
+  'Delgado', 'Berry', 'Perkins', 'Hoffman', 'Johnston', 'Matthews', 'Pena', 'Richards', 'Contreras', 'Willis',
+  'Carpenter', 'Lawrence', 'Sandoval', 'Guerrero', 'George', 'Chapman', 'Rios', 'Estrada', 'Ortega', 'Watkins',
+  'Greene', 'Nunez', 'Wheeler', 'Valdez', 'Harper', 'Burke', 'Larson', 'Santiago', 'Maldonado', 'Morrison',
+  'Franklin', 'Carlson', 'Austin', 'Dominguez', 'Carr', 'Lawson', 'Jacobs', 'Obrien', 'Lynch', 'Singh',
+  'Vega', 'Bishop', 'Montgomery', 'Oliver', 'Jensen', 'Harvey', 'Williamson', 'Gilbert', 'Dean', 'Sims',
+  'Espinoza', 'Howell', 'Li', 'Wong', 'Reid', 'Hanson', 'Le', 'McCoy', 'Garrett', 'Burton',
+  'Fuller', 'Wang', 'Weber', 'Welch', 'Rojas', 'Lucas', 'Marquez', 'Fields', 'Park', 'Yang',
+  'Little', 'Banks', 'Padilla', 'Day', 'Walsh', 'Bowman', 'Schultz', 'Luna', 'Fowler', 'Mejia',
+  'Davidson', 'Acosta', 'Brewer', 'May', 'Holland', 'Juarez', 'Newman', 'Pearson', 'Curtis', 'Cortez',
+  'Douglas', 'Schneider', 'Joseph', 'Barrett', 'Navarro', 'Figueroa', 'Keller', 'Avila', 'Wade', 'Molina',
+  'Stanley', 'Hopkins', 'Campos', 'Barnett', 'Bates', 'Chambers', 'Caldwell', 'Beck', 'Lambert', 'Miranda',
+  'Byrd', 'Craig', 'Ayala', 'Lowe', 'Frazier', 'Powers', 'Neal', 'Leonard', 'Gregory', 'Carrillo',
+  'Sutton', 'Fleming', 'Rhodes', 'Shelton', 'Schwartz', 'Norris', 'Jennings', 'Watts', 'Duran', 'Walters',
+  'Cohen', 'McDaniel', 'Moran', 'Parks', 'Steele', 'Vaughn', 'Becker', 'Holt', 'DeLeon', 'Barker',
+  'Terry', 'Hale', 'Leon', 'Hail', 'Benson', 'Haynes', 'Horton', 'Miles', 'Lyons', 'Pham',
+  'Graves', 'Bush', 'Thornton', 'Wolfe', 'Warner', 'Cabrera', 'McKinney', 'Mann', 'Zimmerman', 'Dawson',
+  'Lara', 'Fletcher', 'Page', 'McCarthy', 'Love', 'Robles', 'Cervantes', 'Solis', 'Erickson', 'Reeves',
+  'Chang', 'Klein', 'Salinas', 'Fuentes', 'Baldwin', 'Daniel', 'Simon', 'Velasquez', 'Hardy', 'Higgins'
+];
+
+// Generate unique student name with random suffix to prevent duplicates
 const generateUniqueName = () => {
-  let attempts = 0;
-  const maxAttempts = 100;
+  // Randomly select first and last name from the large datasets
+  const firstName = faker.helpers.arrayElement(firstNames);
+  const lastName = faker.helpers.arrayElement(lastNames);
   
-  while (attempts < maxAttempts) {
-    const firstName = generateRandomName();
-    const lastName = generateRandomName();
-    const fullName = `${lastName} ${firstName}`;
-    
-    // Check if name is unique
-    if (!generatedNames.has(fullName)) {
-      generatedNames.add(fullName);
-      return { firstName, lastName, fullName };
-    }
-    
-    attempts++;
-  }
+  // Add 1-2 random lowercase letters as suffix to lastName to prevent duplicates
+  const suffixLength = faker.number.int({ min: 1, max: 2 });
+  const suffix = faker.string.alpha({ length: suffixLength, casing: 'lower' });
   
-  // Fallback: append unique number if all attempts failed (extremely unlikely)
-  const firstName = generateRandomName();
-  const lastName = generateRandomName();
-  const uniqueId = faker.string.numeric(2);
-  const fullName = `${lastName} ${firstName}${uniqueId}`;
+  const lastNameWithSuffix = `${lastName}${suffix}`;
+  const fullName = `${lastNameWithSuffix} ${firstName}`;
+  
+  // Track the name (optional, since suffix makes it highly unique)
   generatedNames.add(fullName);
   
-  return { firstName, lastName, fullName };
+  return { firstName, lastName: lastNameWithSuffix, fullName };
 };
 
 export const generateRandomData = () => {
