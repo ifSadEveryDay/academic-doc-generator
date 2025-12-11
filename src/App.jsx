@@ -294,8 +294,8 @@ const App = () => {
 
   const handleWheel = (e) => {
     e.preventDefault();
-    const delta = e.deltaY > 0 ? -0.05 : 0.05;
-    setScale(prev => Math.max(0.2, Math.min(2, prev + delta)));
+    const delta = e.deltaY > 0 ? -0.01 : 0.01;
+    setScale(prev => Math.max(0.1, Math.min(1, prev + delta)));
   };
 
   const handlePanStart = (e) => {
