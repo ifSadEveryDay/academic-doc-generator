@@ -156,6 +156,63 @@ export const generateRandomData = () => {
     });
   };
 
+  const formatMonthYear = (date) => {
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+    });
+  };
+
+  const parseTerm = (termStr) => {
+    if (!termStr || typeof termStr !== 'string') return null;
+    const match = termStr.trim().match(/^(Fall|Spring|Summer|Winter)\s+(\d{4})$/i);
+    if (!match) return null;
+    const season = match[1].charAt(0).toUpperCase() + match[1].slice(1).toLowerCase();
+    const year = Number(match[2]);
+    if (!Number.isFinite(year)) return null;
+    return { season, year };
+  };
+
+  const getAcademicYear = (season, year) => {
+    if (!season || !Number.isFinite(year)) return '';
+    if (season === 'Fall') return `${year}-${year + 1}`;
+    return `${year - 1}-${year}`;
+  };
+
+  const getTermDateRange = (season, year) => {
+    if (!season || !Number.isFinite(year)) return null;
+
+    if (season === 'Fall') {
+      return {
+        start: new Date(year, 7, 25),
+        end: new Date(year, 11, 15),
+      };
+    }
+
+    if (season === 'Spring') {
+      return {
+        start: new Date(year, 0, 15),
+        end: new Date(year, 4, 15),
+      };
+    }
+
+    if (season === 'Summer') {
+      return {
+        start: new Date(year, 4, 25),
+        end: new Date(year, 7, 10),
+      };
+    }
+
+    if (season === 'Winter') {
+      return {
+        start: new Date(year, 0, 2),
+        end: new Date(year, 0, 20),
+      };
+    }
+
+    return null;
+  };
+
   const { firstName, lastName, fullName } = generateUniqueName();
 
   // Default university (not randomized)
@@ -286,7 +343,8 @@ export const generateRandomData = () => {
     });
   };
 
-  const termCourses = generateCourses(selectedMajor.prefix, "Fall 2025");
+  const currentTermLabel = "Fall 2025";
+  const termCourses = generateCourses(selectedMajor.prefix, currentTermLabel);
   const springCourses = generateCourses(selectedMajor.prefix, "Spring 2026");
 
   // Calculate GPA logic
@@ -341,6 +399,27 @@ export const generateRandomData = () => {
   admissionDate.setMonth(faker.helpers.arrayElement([0, 1, 7, 8]));
   admissionDate.setDate(faker.number.int({ min: 15, max: 28 }));
 
+  const parsedTerm = parseTerm(currentTermLabel);
+  const termDateRange = parsedTerm ? getTermDateRange(parsedTerm.season, parsedTerm.year) : null;
+  const academicYear = parsedTerm ? getAcademicYear(parsedTerm.season, parsedTerm.year) : '';
+
+  const registrationDate = (() => {
+    const from = new Date(currentDate);
+    from.setMonth(from.getMonth() - 3);
+    const to = new Date(currentDate);
+    to.setDate(to.getDate() - 1);
+    if (to < from) return to;
+    return faker.date.between({ from, to });
+  })();
+
+  const anticipatedGraduationDateObj = (() => {
+    const d = new Date(admissionDate);
+    d.setFullYear(d.getFullYear() + 4);
+    d.setMonth(4);
+    d.setDate(15);
+    return d;
+  })();
+
   // Card Issue Date: not earlier than 3 months ago from current date
   const threeMonthsAgo = new Date(currentDate);
   threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
@@ -362,7 +441,7 @@ export const generateRandomData = () => {
     studentID: `${faker.string.numeric(6)}-${faker.string.numeric(4)}`,
     passportNumber: faker.string.alphanumeric(9).toUpperCase(), // Added passport
     address: `${faker.location.streetAddress()}, ${faker.location.city()}, ${faker.location.state()}`,
-    term: "Fall 2025", 
+    term: currentTermLabel, 
     major: selectedMajor.name, 
     program: selectedMajor.program,
     college: selectedMajor.college,
@@ -370,8 +449,17 @@ export const generateRandomData = () => {
     dueDate: formatDate(dueDate),
     issueDate: formatDate(issueDate),
     admissionDate: formatDate(admissionDate), // Added admission date
+    academicYear,
+    termSeason: parsedTerm ? parsedTerm.season : '',
+    termYear: parsedTerm ? parsedTerm.year : '',
+    termStartDate: termDateRange ? formatDate(termDateRange.start) : '',
+    termEndDate: termDateRange ? formatDate(termDateRange.end) : '',
+    registrationDate: registrationDate ? formatDate(registrationDate) : '',
+    anticipatedGraduationDate: formatMonthYear(anticipatedGraduationDateObj),
+    currentTermCreditHours: Number.isFinite(fallStats.attempted) ? Math.round(fallStats.attempted).toString() : '',
+    academicStanding: 'Good Standing',
     officials: {
-        dean: `${faker.person.lastName()}, ${faker.person.firstName()} (PhD)`,
+        dean: `${faker.person.lastName()}, ${faker.person.firstName()} (PhD)	`,
         registrar: `${faker.person.lastName()}, ${faker.person.firstName()}`
     },
     tuition: {
